@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="author" content="Eiki Furuya">
+  <title>Bear Ninja Hunter — CA8-JS3-BNH</title>
+  <style>
+    body{font-family: Arial, Helvetica, sans-serif; background:#f6f6f8; color:#222; margin:0; padding:0}
+    header{background:#394a57;color:#fff;padding:18px 20px;text-align:center}
+    main{max-width:900px;margin:28px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+    h1{margin:0;font-size:22px}
+    #results{white-space:pre-wrap;margin-top:18px;padding:12px;background:#f0f4f7;border-radius:6px;border:1px solid #e0e6ea}
+    /* final large message style (centered, large font like instructor screenshot) */
+    #results.final{font-size:48px;text-align:center;padding:40px 20px;background:#fff;border:0;color:#222}
+    footer{margin-top:18px;font-size:13px;color:#666}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bear Ninja Hunter — CA8 (Arrays, Loops, Data Types)</h1>
+  </header>
+  <main>
+    <p>This page runs the Bear Ninja Hunter game. Follow prompts to play.</p>
+    <div id="results">結果はここに表示されます。</div>
+    <footer>
+      <p id="disclaimer"></p>
+    </footer>
+  </main>
+
+  <script>
+    // All variables declared at top
+    const choices = ['Bear','Ninja','Hunter']; // array of possible choices
+    const validChoicesLower = choices.map(c => c.toLowerCase());
+    let playerName = null;
+    let playerChoiceRaw = null;
+    let playerChoice = null;
+    let computerIndex = null;
+    let computerChoice = null;
+    let playAgainPrompt = null;
+    let finalSummary = '';
+
+    // 1) Ask for player's name (welcome). Handle CANCEL.
+    playerName = prompt('Welcome to Bear Hunter Ninja! Please enter your name to get started:');
+    if (playerName === null) {
+      alert('Game cancelled. You clicked Cancel when asked for your name. Refresh the page to restart.');
+      let resultsEl = document.getElementById('results');
+      resultsEl.innerText = 'Player cancelled at name prompt.\nPlease Press F5 to Play Again.';
+      if (resultsEl.innerText.indexOf('Please Press F5') !== -1) { resultsEl.classList.add('final'); } else { resultsEl.classList.remove('final'); }
+    } else {
+      // Greet the player
+      alert('Hi ' + playerName + " Let's Play!!");
+
+      // Main game loop: combine result display and "play again" prompt together
+      while (true) {
+        // Prompt for player's choice
+        playerChoiceRaw = prompt('Who are you: Bear, Ninja, or Hunter?');
+
+        // Handle CANCEL on choice prompt
+        if (playerChoiceRaw === null) {
+          alert('You cancelled the choice prompt. Correct input must be: Bear, Ninja, or Hunter (case insensitive). Refresh page to restart.');
+          finalSummary = playerName + ' cancelled the game.';
+          document.getElementById('results').innerText = finalSummary;
+          console.log(finalSummary);
+          break; // exit loop
+        }
+
+        // Trim and force case
+        playerChoiceRaw = playerChoiceRaw.trim();
+        if (playerChoiceRaw.length === 0) {
+          alert('No input received. Please enter: Bear, Ninja, or Hunter (not blank). Refresh page to restart.');
+          finalSummary = playerName + ' entered empty input.';
+          document.getElementById('results').innerText = finalSummary;
+          console.log(finalSummary);
+          break; // exit loop
+        }
+
+        playerChoice = playerChoiceRaw.toLowerCase();
+
+        // Validate input
+        if (validChoicesLower.indexOf(playerChoice) === -1) {
+          alert('Invalid input: "' + playerChoiceRaw + '". Please enter one of: Bear, Ninja, Hunter (case insensitive). Refresh page to restart.');
+          finalSummary = playerName + ' entered invalid input: ' + playerChoiceRaw;
+          document.getElementById('results').innerText = finalSummary;
+          console.log(finalSummary);
+          break; // exit loop
+        }
+
+        // Computer random choice using Math.random and array length
+        computerIndex = Math.floor(Math.random() * choices.length);
+        computerChoice = choices[computerIndex];
+
+        // Determine winner using conditional logic and switch/if-else
+        // Game rules (circular): Bear defeats Ninja, Ninja defeats Hunter, Hunter defeats Bear
+        let outcome = '';
+        const player = playerChoice; // lowercased
+        const computer = computerChoice.toLowerCase();
+
+        if (player === computer) {
+          outcome = 'Tie';
+        } else {
+          // Use switch on player's choice as required
+          switch (player) {
+            case 'bear':
+              if (computer === 'ninja') { outcome = 'Player wins'; }
+              else { outcome = 'Computer wins'; }
+              break;
+            case 'ninja':
+              if (computer === 'hunter') { outcome = 'Player wins'; }
+              else { outcome = 'Computer wins'; }
+              break;
+            case 'hunter':
+              if (computer === 'bear') { outcome = 'Player wins'; }
+              else { outcome = 'Computer wins'; }
+              break;
+            default:
+              outcome = 'Error';
+          }
+        }
+
+        // Prepare result message (concatenate strings using variables) to match instructor screenshots
+        const line1 = playerName + ' you chose ' + playerChoiceRaw + '!';
+        const line2 = 'The computer chose ' + computerChoice + '!';
+        let line3 = '';
+        if (outcome === 'Player wins') { line3 = 'You Win!!'; }
+        else if (outcome === 'Computer wins') { line3 = 'You Lose!!'; }
+        else if (outcome === 'Tie') { line3 = 'Tie Game!!'; }
+        else { line3 = 'Result: ' + outcome + '.'; }
+        const fullMessage = line1 + '\n' + line2 + '\n' + line3;
+
+        // Output using two methods: alert and HTML + console
+        alert(fullMessage);
+        console.log(fullMessage);
+        document.getElementById('results').innerText = fullMessage;
+
+        // Ask to play again using prompt with exact phrasing from screenshot
+        playAgainPrompt = prompt(playerName + ', would you like to play again, Yes or No?');
+
+        if (playAgainPrompt === null) {
+          // Player cancelled the play-again prompt
+          alert('Play again prompt cancelled. Game ending.');
+          finalSummary = 'Session ended: ' + playerName + ' cancelled the play-again prompt.' + '\nPlease Press F5 to Play Again.';
+          let resultsEl = document.getElementById('results');
+          resultsEl.innerText = finalSummary;
+          if (resultsEl.innerText.indexOf('Please Press F5') !== -1) { resultsEl.classList.add('final'); } else { resultsEl.classList.remove('final'); }
+          console.log(finalSummary);
+          break; // exit loop
+        }
+
+        const playAgainAnswer = playAgainPrompt.trim().toLowerCase();
+        if (playAgainAnswer === 'yes' || playAgainAnswer === 'y') {
+          // continue loop to play again
+          continue;
+        } else if (playAgainAnswer === 'no' || playAgainAnswer === 'n') {
+          // show final summary on page and console
+          finalSummary = playerName + ' finished playing. Last play: ' + playerChoiceRaw + ' vs ' + computerChoice + ' -> ' + outcome + '.' + '\nPlease Press F5 to Play Again.';
+          let resultsEl = document.getElementById('results');
+          resultsEl.innerText = finalSummary;
+          if (resultsEl.innerText.indexOf('Please Press F5') !== -1) { resultsEl.classList.add('final'); } else { resultsEl.classList.remove('final'); }
+          console.log(finalSummary);
+          alert('Thanks for playing! ' + finalSummary);
+          break; // exit loop
+        } else {
+          // invalid play again answer
+          alert('Invalid response for "Play again": "' + playAgainPrompt + '". Enter Yes or No. Refresh page to restart.');
+          finalSummary = playerName + ' provided invalid play-again response: ' + playAgainPrompt + '\nPlease Press F5 to Play Again.';
+          let resultsEl = document.getElementById('results');
+          resultsEl.innerText = finalSummary;
+          if (resultsEl.innerText.indexOf('Please Press F5') !== -1) { resultsEl.classList.add('final'); } else { resultsEl.classList.remove('final'); }
+          console.log(finalSummary);
+          break; // exit loop
+        }
+      } // end while
+    }
+
+  </script>
+</body>
+</html>
